@@ -1,12 +1,13 @@
 package rest
 
 import (
+	"chill_wave/lib/persistence"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func ServeAPI(endpoint string) error {
-	handler := &eventServiceHandler{}
+func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) error {
+	handler := newEventHandler(dbHandler)
 	r := mux.NewRouter()
 	eventsRouter := r.PathPrefix("/events")
 
@@ -14,5 +15,5 @@ func ServeAPI(endpoint string) error {
 	eventsRouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
 	eventsRouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
 
-	return http.ListenAndServe(":8181", r)
+	return http.ListenAndServe(endpoint, r)
 }
