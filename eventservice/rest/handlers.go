@@ -65,13 +65,14 @@ func (eventHandler *eventServiceHandler) findEventHandler(w http.ResponseWriter,
 
 func (eventHandler *eventServiceHandler) allEventHandler(w http.ResponseWriter, r *http.Request) {
 	events, err := eventHandler.dbhandler.FindAllAvailableEvents()
-
+	fmt.Println("All events start")
 	if err != nil {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "{error: Error occured while trying to find all available events %s}", err)
 		return
 	}
 
+	fmt.Println("All events mid")
 	w.Header().Set("Content-Type", "application/json;charset=utf8")
 	err = json.NewEncoder(w).Encode(&events)
 
@@ -79,6 +80,8 @@ func (eventHandler *eventServiceHandler) allEventHandler(w http.ResponseWriter, 
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "{error: Error occured while trying to encode events to JSON %s}", err)
 	}
+
+	fmt.Println("All events end")
 }
 
 func (eventHandler *eventServiceHandler) newEventHandler(w http.ResponseWriter, r *http.Request) {
