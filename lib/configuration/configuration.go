@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"chill_wave/lib/persistence/dblayer"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,7 +9,7 @@ import (
 
 var (
 	DBTypeDefault          = dblayer.DBTYPE("mongodb")
-	DBConnectionDefault    = "mongodb:127.0.0.1"
+	DBConnectionDefault    = "mongodb://127.0.0.1"
 	RestfulEndpointDefault = "localhost:8181"
 )
 
