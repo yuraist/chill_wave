@@ -2,7 +2,6 @@ package mongolayer
 
 import (
 	"chill_wave/lib/persistence"
-	"fmt"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -63,7 +62,6 @@ func (mgoLayer *MongoDBLayer) FindEventByName(name string) (persistence.Event, e
 
 func (mgoLayer *MongoDBLayer) FindAllAvailableEvents() ([]persistence.Event, error) {
 	s := mgoLayer.getFreshSession()
-	fmt.Println("Find all events db layer")
 	defer s.Close()
 	var events []persistence.Event
 	err := s.DB(DB).C(EVENTS).Find(nil).All(&events)

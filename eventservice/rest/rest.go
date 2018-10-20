@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) error {
+func ServeAPI(endpoint string, tlsendpoint string, dbHandler persistence.DatabaseHandler) (chan error, chan error) {
 	handler := newEventHandler(dbHandler)
 	r := mux.NewRouter()
 	eventsRouter := r.PathPrefix("/events").Subrouter()
@@ -15,5 +15,16 @@ func ServeAPI(endpoint string, dbHandler persistence.DatabaseHandler) error {
 	eventsRouter.Methods("GET").Path("").HandlerFunc(handler.allEventHandler)
 	eventsRouter.Methods("POST").Path("").HandlerFunc(handler.newEventHandler)
 
-	return http.ListenAndServe(endpoint, r)
+	httpErrorChannel := make(chan error)
+	httpTLSErrorChannel := make(chan error)
+
+	go func() {
+		httpErrorChannel <- http.ListenAndServe(endpoint, r)
+	}()
+
+	go func() {
+		httpTLSErrorChannel <- http.ListenAndServeTLS(tlsendpoint, "cert.pem", "key.pem", r)
+	}()
+
+	return httpErrorChannel, httpTLSErrorChannel
 }
