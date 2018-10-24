@@ -1,6 +1,8 @@
 package rest
 
 import (
+	"chill_wave/contracts"
+	"chill_wave/lib/msgqueue"
 	"chill_wave/lib/persistence"
 	"encoding/hex"
 	"encoding/json"
@@ -8,14 +10,16 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type eventServiceHandler struct {
 	dbhandler persistence.DatabaseHandler
+	eventEmitter msgqueue.EventEmitter
 }
 
-func newEventHandler(databaseHandler persistence.DatabaseHandler) *eventServiceHandler {
-	return &eventServiceHandler{dbhandler: databaseHandler,}
+func newEventHandler(databaseHandler persistence.DatabaseHandler, eventEmitter msgqueue.EventEmitter) *eventServiceHandler {
+	return &eventServiceHandler{dbhandler: databaseHandler, eventEmitter: eventEmitter,}
 }
 
 func (eventHandler *eventServiceHandler) findEventHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,5 +103,18 @@ func (eventHandler *eventServiceHandler) newEventHandler(w http.ResponseWriter, 
 		return
 	}
 
-	fmt.Fprintf(w, `{"id": %d}`, id)
+	msg := contracts.EventCreatedEvent{
+		ID: hex.EncodeToString(id),
+		Name: event.Name,
+		Start: time.Unix(event.StartDate, 0),
+		End: time.Unix(event.EndDate, 0),
+		LocationID: string(event.Location.ID),
+	}
+
+	eventHandler.eventEmitter.Emit(&msg)
+
+	w.Header().Set("Content-Type", "application/json;charset=utf8")
+
+	w.WriteHeader(201)
+	json.NewEncoder(w).Encode(&event)
 }

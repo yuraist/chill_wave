@@ -1,13 +1,15 @@
 package rest
 
 import (
+	"chill_wave/lib/msgqueue"
 	"chill_wave/lib/persistence"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func ServeAPI(endpoint string, tlsendpoint string, dbHandler persistence.DatabaseHandler) (chan error, chan error) {
-	handler := newEventHandler(dbHandler)
+func ServeAPI(endpoint string, tlsendpoint string, dbHandler persistence.DatabaseHandler,
+	eventEmitter msgqueue.EventEmitter) (chan error, chan error) {
+	handler := newEventHandler(dbHandler, eventEmitter)
 	r := mux.NewRouter()
 	eventsRouter := r.PathPrefix("/events").Subrouter()
 
